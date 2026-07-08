@@ -4,6 +4,7 @@ use crate::check_win;
 use crate::player_move;
 use crate::update_board;
 
+#[derive(Debug)]
 enum Player {
     Human,
     Bot,
@@ -16,6 +17,7 @@ impl Player {
         }
     }
 }
+#[derive(Debug)]
 pub struct Game {
     pub board: Board,
     current_player: Player,

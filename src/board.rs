@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct Board {
     pub board: Vec<u8>,
 }

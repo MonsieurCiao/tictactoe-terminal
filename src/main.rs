@@ -1,35 +1,33 @@
 use color_eyre::eyre::{Context, Result};
 use std::io;
-use tictactoe::Game;
+use tictactoe::{Board, Game};
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::{
     DefaultTerminal, Frame,
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
-    style::Stylize,
+    style::{Color, Style, Stylize},
     symbols::border,
     text::{Line, Text},
-    widgets::{Block, Paragraph, Widget},
+    widgets::{Block, Borders, Paragraph, Widget},
 };
 
 fn main() -> Result<()> {
     color_eyre::install()?;
     let mut terminal = ratatui::init();
-    let app_result = App::default().run(&mut terminal);
-
-    // let mut game = Game::new();
-    // game.run();
+    let mut game = Game::new();
+    let app_result = App::new(0, game).run(&mut terminal);
 
     ratatui::restore();
     app_result
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct App {
     //here goes the state
     position: u8,
-    counter: u8,
+    game: Game,
     exit: bool,
 }
 
@@ -40,6 +38,13 @@ enum GotoDir {
     Right,
 }
 impl App {
+    pub fn new(position: u8, game: Game) -> Self {
+        Self {
+            position: position,
+            game: game,
+            exit: false,
+        }
+    }
     pub fn run(&mut self, terminal: &mut DefaultTerminal) -> Result<()> {
         while !self.exit {
             terminal.draw(|frame| self.draw(frame))?;
@@ -82,7 +87,7 @@ impl App {
                 }
             }
             GotoDir::Right => {
-                if self.position > 0 {
+                if self.position < 8 {
                     self.position += 1;
                 }
             }
@@ -118,54 +123,44 @@ impl Widget for &App {
             .title_bottom(instructions)
             .border_set(border::THICK);
 
-        let counter_text = Text::from(vec![Line::from(vec![
-            "Value: ".into(),
-            self.counter.to_string().yellow(),
-        ])]);
-
-        Paragraph::new(counter_text)
-            .centered()
-            .block(block)
-            .render(area, buf);
-        let center = Rect::new(area.width / 2 - 30 / 2, area.height / 2 - 30 / 2, 30, 30);
-        let rows = Layout::horizontal([
-            Constraint::Ratio(3, 3),
-            Constraint::Ratio(3, 3),
-            Constraint::Ratio(3, 3),
-        ])
-        .split(center);
-
-        for row in rows.iter() {
-            let cols = Layout::vertical([
-                Constraint::Ratio(3, 3),
-                Constraint::Ratio(3, 3),
-                Constraint::Ratio(3, 3),
-            ])
-            .split(*row);
-
-            for cell in cols.iter() {
-                //cell is a &Rect, so we render into *cell
-                let block = Block::bordered();
-                block.render(*cell, buf);
-            }
+        Grid {
+            rows: 3,
+            cols: 3,
+            board: &self.game.board,
+            position: self.position.clone(),
         }
+        .render(area, buf);
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+struct Grid<'a> {
+    rows: usize,
+    cols: usize,
+    board: &'a Board,
+    position: u8,
+}
 
-    #[test]
-    fn handle_key_event() {
-        let mut app = App::default();
-        app.handle_key_event(KeyCode::Right.into());
-        assert_eq!(app.counter, 1);
+impl<'a> Widget for Grid<'a> {
+    fn render(self, area: Rect, buf: &mut Buffer) {
+        let col_constraints = (0..self.cols).map(|_| Constraint::Length(8));
+        let row_constraints = (0..self.rows).map(|_| Constraint::Length(4));
 
-        app.handle_key_event(KeyCode::Left.into());
-        assert_eq!(app.counter, 0);
+        let horizontal = Layout::horizontal(col_constraints);
+        let vertical = Layout::vertical(row_constraints);
 
-        app.handle_key_event(KeyCode::Char('q').into());
-        assert!(app.exit);
+        let rows = vertical.split(area);
+        let cells = rows.iter().flat_map(|&row| horizontal.split(row).to_vec());
+
+        for (i, cell) in cells.enumerate() {
+            if i as u8 == self.position {
+                Paragraph::new(format!("{:?}", self.board.board[i]))
+                    .block(Block::bordered().border_style(Style::new().blue()))
+                    .render(cell, buf);
+            } else {
+                Paragraph::new(format!("{:?}", self.board.board[i]))
+                    .block(Block::bordered())
+                    .render(cell, buf);
+            }
+        }
     }
 }
