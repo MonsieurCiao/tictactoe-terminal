@@ -19,9 +19,9 @@ impl Player {
 }
 #[derive(Debug)]
 pub struct Game {
-    pub board: Board,
-    current_player: Player,
-    pub finished: bool,
+    pub(crate) board: Board,
+    pub(crate) current_player: Player,
+    pub(crate) finished: bool,
 }
 
 impl Game {
