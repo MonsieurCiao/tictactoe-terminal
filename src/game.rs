@@ -1,11 +1,12 @@
 use crate::Board;
+use crate::BoardMove;
 use crate::bot_move;
 use crate::check_win;
 use crate::player_move;
 use crate::update_board;
 
-#[derive(Debug)]
-enum Player {
+#[derive(Debug, Eq, PartialEq)]
+pub enum Player {
     Human,
     Bot,
 }
@@ -33,33 +34,29 @@ impl Game {
         }
     }
 
-    pub fn run(&mut self) {
-        while !self.finished {
-            let mv = match self.current_player {
-                Player::Human => match player_move(&self.board.board) {
-                    Ok(mv) => mv,
-                    Err(err) => {
-                        println!("{:?}", err);
-                        continue;
-                    }
-                },
-                Player::Bot => bot_move(&self.board.board),
-            };
+    pub fn apply_move(&mut self, mv: BoardMove) {
+        //apply move
+        update_board(&mut self.board.board, mv);
 
-            //apply move
-            update_board(&mut self.board.board, mv);
-
-            //check win
-            match check_win(&self.board.board) {
-                Some(contestant) => {
-                    Self::announce_win(contestant);
-                    self.finished = true;
-                }
-                _ => (),
+        //check win
+        match check_win(&self.board.board) {
+            Some(contestant) => {
+                Self::announce_win(contestant);
+                self.finished = true;
             }
-
-            self.current_player = self.current_player.next();
+            _ => (),
         }
+
+        self.current_player = self.current_player.next();
+
+        //switch to bot
+        if self.current_player == Player::Bot {
+            self.get_bot_move();
+        }
+    }
+    fn get_bot_move(&mut self) {
+        let mv = bot_move(&self.board.board);
+        self.apply_move(mv);
     }
     pub fn announce_win(contestant: u8) {
         match contestant {

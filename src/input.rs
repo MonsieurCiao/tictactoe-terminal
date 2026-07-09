@@ -1,6 +1,7 @@
 use crate::App;
 use crate::BoardMove;
 use crate::MoveError;
+use crate::Player;
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use std::io;
 
@@ -31,15 +32,20 @@ impl App {
             _ => {}
         }
     }
-    fn confirm_move(&mut self)-> Result<BoardMove, MoveError> {
+    fn confirm_move(&mut self) {
         if self.game.board.board[(self.position) as usize] != 0 {
-            return;
+            return; //TODO: handle display of error        
+        }
+        if self.game.current_player != Player::Human {
+            return; //TODO: handle display of error
         }
         // player mark at position
-        return BoardMove {
-            self.position
-        }
-        //switch to bot
+        let mv = BoardMove {
+            idx: self.position as usize,
+            symbol: 'x',
+        };
+
+        self.game.apply_move(mv);
     }
     fn goto(&mut self, dir: GotoDir) {
         match dir {
