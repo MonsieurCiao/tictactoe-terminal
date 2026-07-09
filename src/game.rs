@@ -48,6 +48,8 @@ impl Game {
 
             //apply move
             update_board(&mut self.board.board, mv);
+
+            //check win
             match check_win(&self.board.board) {
                 Some(contestant) => {
                     Self::announce_win(contestant);
@@ -56,7 +58,6 @@ impl Game {
                 _ => (),
             }
 
-            //check win
             self.current_player = self.current_player.next();
         }
     }
