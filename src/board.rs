@@ -1,10 +1,14 @@
 #[derive(Debug)]
 pub struct Board {
     pub board: Vec<u8>,
+    move_count: u8,
 }
 impl Board {
     pub fn new() -> Self {
-        Self { board: vec![0; 9] }
+        Self {
+            board: vec![0; 9],
+            move_count: 0,
+        }
     }
 }
 
@@ -19,9 +23,10 @@ pub fn update_board(board: &mut Vec<u8>, board_move: BoardMove) {
     let contestant = if board_move.symbol == 'x' { 1 } else { 2 };
     //update board
     board[board_move.idx] = contestant;
-    println!("{:?}", board);
 }
-pub fn check_win(board: &[u8]) -> Option<u8> {
+pub fn check_win(board_struct: &mut Board) -> Option<u8> {
+    board_struct.move_count += 1;
+    let board: &[u8] = &board_struct.board;
     let lines = [
         [0, 1, 2],
         [3, 4, 5],
@@ -39,5 +44,10 @@ pub fn check_win(board: &[u8]) -> Option<u8> {
             return Some(board[a]);
         }
     }
-    None
+    // no winner found, but if move count == 9, then end game
+    if board_struct.move_count == 9 {
+        Some(0)
+    } else {
+        None
+    }
 }

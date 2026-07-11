@@ -39,7 +39,7 @@ impl Game {
         update_board(&mut self.board.board, mv);
 
         //check win
-        match check_win(&self.board.board) {
+        match check_win(&mut self.board) {
             Some(contestant) => {
                 Self::announce_win(contestant);
                 self.finished = true;
@@ -50,7 +50,7 @@ impl Game {
         self.current_player = self.current_player.next();
 
         //switch to bot
-        if self.current_player == Player::Bot {
+        if self.current_player == Player::Bot && !self.finished {
             self.get_bot_move();
         }
     }
@@ -59,14 +59,14 @@ impl Game {
         self.apply_move(mv);
     }
     pub fn announce_win(contestant: u8) {
-        match contestant {
-            1 => {
-                println!("player won!");
-            }
-            2 => {
-                println!("bot won!");
-            }
-            _ => (),
-        }
+        // match contestant {
+        //     1 => {
+        //         println!("player won!");
+        //     }
+        //     2 => {
+        //         println!("bot won!");
+        //     }
+        //     _ => (),
+        // }
     }
 }

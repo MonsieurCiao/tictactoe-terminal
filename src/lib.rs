@@ -6,6 +6,7 @@ pub mod error;
 pub mod game;
 pub mod input;
 pub mod player;
+pub mod rendering;
 
 pub use ai::bot_move;
 pub use app::App;
