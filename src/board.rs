@@ -12,13 +12,26 @@ impl Board {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+impl Clone for Board {
+    fn clone(&self) -> Self {
+        let mut board: Vec<u8> = vec![];
+        for cell in &self.board {
+            board.push(*cell);
+        }
+        Self {
+            board,
+            move_count: self.move_count, //here a copy happens!!
+        }
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
 pub struct BoardMove {
     pub idx: usize,
     pub symbol: char,
 }
 
-pub fn update_board(board: &mut Vec<u8>, board_move: BoardMove) {
+pub fn update_board(board: &mut [u8], board_move: BoardMove) {
     //convert symbol to number (1: player, 2: bot)
     let contestant = if board_move.symbol == 'x' { 1 } else { 2 };
     //update board

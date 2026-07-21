@@ -1,4 +1,4 @@
-use crate::BoardMove;
+use crate::{Board, BoardMove, check_win, update_board};
 use rand::prelude::IndexedRandom;
 use std::panic;
 
@@ -17,4 +17,33 @@ pub fn bot_move(board: &Vec<u8>) -> BoardMove {
         Some(mv) => mv.clone(),
         None => panic!("no spots left"),
     }
+}
+
+pub fn minimax(board_struct: Board) {
+    // recursive
+
+    // collect all open spots
+    let mut open_moves: Vec<BoardMove> = vec![];
+    for (idx, cell) in board_struct.board.iter().enumerate() {
+        match *cell {
+            0 => open_moves.push(BoardMove { idx, symbol: 'o' }),
+            _ => {}
+        }
+    }
+
+    // eval gamestate for all of the collected moves
+    for mv in open_moves {
+        //apply move
+        let mut new_board = board_struct.clone();
+        update_board(&mut new_board.board, mv);
+
+        // if move found that ends game, take it.
+        let win = match check_win(&mut new_board) {
+            _ => false,
+        };
+    }
+    // else search further on each branch until depth is reached
+    // if no move decided, take random.
+
+    // if no eval possible, make every choice possible and analyze those gamestates
 }
