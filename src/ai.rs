@@ -19,14 +19,13 @@ pub fn bot_move(board: &Vec<u8>) -> BoardMove {
     }
 }
 
-pub fn minimax(board_struct: Board) {
-    // recursive
-
+pub fn find_best_move(board_struct: Board, symbol: char) {
+    let best_move: Option<BoardMove> = None;
     // collect all open spots
     let mut open_moves: Vec<BoardMove> = vec![];
     for (idx, cell) in board_struct.board.iter().enumerate() {
         match *cell {
-            0 => open_moves.push(BoardMove { idx, symbol: 'o' }),
+            0 => open_moves.push(BoardMove { idx, symbol }),
             _ => {}
         }
     }
@@ -38,8 +37,11 @@ pub fn minimax(board_struct: Board) {
         update_board(&mut new_board.board, mv);
 
         // if move found that ends game, take it.
-        let win = match check_win(&mut new_board) {
-            _ => false,
+        let score = match check_win(&mut new_board) {
+            Some(1) => Some(-10),
+            Some(2) => Some(10),
+            Some(0) => Some(0),
+            _ => None,
         };
     }
     // else search further on each branch until depth is reached
