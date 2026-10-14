@@ -2,7 +2,6 @@ use crate::Board;
 use crate::BoardMove;
 use crate::bot_move;
 use crate::check_win;
-use crate::player_move;
 use crate::update_board;
 
 #[derive(Debug, Eq, PartialEq)]
@@ -11,7 +10,7 @@ pub enum Player {
     Bot,
 }
 impl Player {
-    fn next(&self) -> Self {
+    pub(crate) fn next(&self) -> Self {
         match self {
             Self::Bot => Self::Human,
             Self::Human => Self::Bot,
@@ -36,7 +35,7 @@ impl Game {
 
     pub fn apply_move(&mut self, mv: BoardMove) {
         //apply move
-        update_board(&mut self.board.board, mv);
+        update_board(&mut self.board, mv);
 
         //check win
         match check_win(&mut self.board) {
@@ -49,13 +48,12 @@ impl Game {
 
         self.current_player = self.current_player.next();
 
-        //switch to bot
         if self.current_player == Player::Bot && !self.finished {
             self.get_bot_move();
         }
     }
     fn get_bot_move(&mut self) {
-        let mv = bot_move(&self.board.board);
+        let mv = bot_move(&mut self.board);
         self.apply_move(mv);
     }
     pub fn announce_win(contestant: u8) {

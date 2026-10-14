@@ -31,14 +31,14 @@ pub struct BoardMove {
     pub symbol: char,
 }
 
-pub fn update_board(board: &mut [u8], board_move: BoardMove) {
+pub fn update_board(board_struct: &mut Board, board_move: BoardMove) {
     //convert symbol to number (1: player, 2: bot)
     let contestant = if board_move.symbol == 'x' { 1 } else { 2 };
     //update board
-    board[board_move.idx] = contestant;
-}
-pub fn check_win(board_struct: &mut Board) -> Option<u8> {
+    board_struct.board[board_move.idx] = contestant;
     board_struct.move_count += 1;
+}
+pub fn check_win(board_struct: &Board) -> Option<u8> {
     let board: &[u8] = &board_struct.board;
     let lines = [
         [0, 1, 2],

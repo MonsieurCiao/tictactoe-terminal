@@ -1,5 +1,6 @@
 use crate::App;
 use crate::Board;
+use ratatui::layout::Direction;
 use ratatui::{
     DefaultTerminal, Frame,
     buffer::Buffer,
@@ -25,19 +26,30 @@ impl Widget for &App {
             " Quit ".into(),
             "<q> ".blue().bold(),
         ]);
-        Block::bordered()
+        let frame_block = Block::bordered()
             .title(title)
             .title_bottom(instructions)
-            .border_set(border::THICK)
-            .render(area, buf);
+            .border_set(border::THICK);
+        let inner = frame_block.inner(area);
+        frame_block.render(area, buf);
 
+        let layout = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints(vec![
+                Constraint::Ratio(1, 3),
+                Constraint::Ratio(1, 3),
+                Constraint::Ratio(1, 3),
+            ])
+            .split(inner);
+
+        let centered = layout[1].centered(Constraint::Length(8 * 3), Constraint::Length(4 * 3));
         Grid {
             rows: 3,
             cols: 3,
             board: &self.game.board,
             position: self.position.clone(),
         }
-        .render(area, buf);
+        .render(centered, buf);
     }
 }
 
@@ -70,5 +82,20 @@ impl<'a> Widget for Grid<'a> {
                     .render(cell, buf);
             }
         }
+    }
+}
+
+struct Dbg {
+    info: Vec<String>,
+}
+impl Widget for Dbg {
+    fn render(self, area: Rect, buf: &mut Buffer) {
+        let block = Block::bordered().title("dbg");
+        for msg in self.info {
+            let msg_block = Block::bordered();
+            let p = Paragraph::new(msg).block(msg_block).render(area, buf);
+        }
+
+        block.render(area, buf);
     }
 }

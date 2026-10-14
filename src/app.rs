@@ -4,7 +4,6 @@ use ratatui::{DefaultTerminal, Frame};
 use crate::{Board, Game};
 #[derive(Debug)]
 pub struct App {
-    //here goes the state
     pub(crate) position: u8,
     pub(crate) game: Game,
     pub(crate) exit: bool,
